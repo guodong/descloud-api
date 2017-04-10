@@ -8,8 +8,8 @@ var expressjwt = require('express-jwt');
 var bodyParser = require('body-parser');
 
 const JWT_SECRET = 'descloudsecreT';
-var user = process.evn.MONGO_USER || '';
-var password = process.evn.MONTO_PASSWORD || '';
+var user = process.env.MONGO_USER || '';
+var password = process.env.MONTO_PASSWORD || '';
 
 MongoClient.connect('mongodb://'+user+':'+password+'@10.10.83.166:27017/descloud', function (err, db) {
   if (err) {
