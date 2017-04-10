@@ -9,12 +9,12 @@ var bodyParser = require('body-parser');
 
 const JWT_SECRET = 'descloudsecreT';
 
-MongoClient.connect('mongodb://localhost:27017/descloud', function (err, db) {
+MongoClient.connect('mongodb://10.10.83.166:27017/descloud', function (err, db) {
   if (err) {
     console.log(err);
     return;
   }
-  
+
   var app = express();
   app.use(cors());
   app.use(bodyParser.json());
