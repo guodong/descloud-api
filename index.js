@@ -21,13 +21,13 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use(expressjwt({ secret: JWT_SECRET}).unless({path: ['/token']}));
-  app.use(function (err, req, res, next) {
-    if (err.name === 'UnauthorizedError') {
-      res.status(401).send({
-        error: 'Unauthorized'
-      });
-    }
-  });
+  // app.use(function (err, req, res, next) {
+  //   if (err.name === 'UnauthorizedError') {
+  //     res.status(401).send({
+  //       error: 'Unauthorized'
+  //     });
+  //   }
+  // });
 
   app.get('/token', function (req, res) {
     Request.post({
@@ -37,13 +37,13 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
         client_secret: '9d4d633b29b4540461ce2339995848b8173101a5',
         code: req.query.code
       }
-    }, function(err, httpResponse, body) {
-      if (body.error) {
-        res.status(401).send({
-          error: 'Unauthorized'
-        });
-        return;
-      }
+    }, function(err, httpResponse, body) {console.log(body)
+      // if (body.error) {
+      //   res.status(401).send({
+      //     error: 'Unauthorized'
+      //   });
+      //   return;
+      // }
       var github_token = body.access_token;
       Request.get({
         url: 'https://api.github.com/user?access_token=' + body.access_token,
