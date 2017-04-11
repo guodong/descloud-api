@@ -1,7 +1,7 @@
 var express = require('express');
 var Request = require('request');
 var cors = require('cors')
-var MongoClient = require('mongodb').MongoClient
+var MongoClient = require('mongodb').MongoClient;
 var ObjectId = require('mongodb').ObjectId;
 var jwt = require('jsonwebtoken');
 var expressjwt = require('express-jwt');
@@ -21,6 +21,13 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use(expressjwt({ secret: JWT_SECRET}).unless({path: ['/token']}));
+  app.use(function (err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+      res.status(401).send({
+        error: 'Unauthorized'
+      });
+    }
+  });
 
   app.get('/token', function (req, res) {
     Request.post({
