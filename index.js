@@ -38,6 +38,12 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
         code: req.query.code
       }
     }, function(err, httpResponse, body) {
+      if (body.error) {
+        res.status(401).send({
+          error: 'Unauthorized'
+        });
+        return;
+      }
       var github_token = body.access_token;
       Request.get({
         url: 'https://api.github.com/user?access_token=' + body.access_token,
