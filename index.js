@@ -20,7 +20,7 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
   var app = express();
   app.use(cors());
   app.use(bodyParser.json());
-  app.use(expressjwt({ secret: JWT_SECRET}).unless({path: ['/token']}));
+  app.use(expressjwt({secret: JWT_SECRET}).unless({path: ['/token']}));
   // app.use(function (err, req, res, next) {
   //   if (err.name === 'UnauthorizedError') {
   //     res.status(401).send({
@@ -38,12 +38,12 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
         code: req.query.code
       }
     }, function(err, httpResponse, body) {console.log(body)
-      // if (body.error) {
-      //   res.status(401).send({
-      //     error: 'Unauthorized'
-      //   });
-      //   return;
-      // }
+      if (body.error) {
+        res.status(401).send({
+          error: 'Unauthorized'
+        });
+        return;
+      }
       var github_token = body.access_token;
       Request.get({
         url: 'https://api.github.com/user?access_token=' + body.access_token,
