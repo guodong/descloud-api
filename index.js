@@ -140,7 +140,7 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
       user: null,
       domainName: null,
       memorySwap: null,
-      memory: 134217728 * 2, // 128m*2
+      memory: 134217728 * 4, // 128m*4
       cpuSet: null,
       cpuShares: null,
       pidMode: null,
