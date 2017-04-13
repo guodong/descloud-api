@@ -6,8 +6,13 @@ var ObjectId = require('mongodb').ObjectId;
 var jwt = require('jsonwebtoken');
 var expressjwt = require('express-jwt');
 var bodyParser = require('body-parser');
+const url = require('url');
 
 const JWT_SECRET = 'descloudsecreT';
+
+const RANCHER_USER = 'CBCA67D9254C7C52D0C0';
+const RANCHER_PASS = 'R45874piapVw45Sgyp7XogBJu7RLgm3HyEHEed2k';
+
 
 var mongo_addr = process.env.MONGO_ADDR || 'localhost:27017/descloud';
 
@@ -21,13 +26,13 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
   app.use(cors());
   app.use(bodyParser.json());
   app.use(expressjwt({secret: JWT_SECRET}).unless({path: ['/token']}));
-  // app.use(function (err, req, res, next) {
-  //   if (err.name === 'UnauthorizedError') {
-  //     res.status(401).send({
-  //       error: 'Unauthorized'
-  //     });
-  //   }
-  // });
+  app.use(function (err, req, res, next) {
+    if (err.name === 'UnauthorizedError') {
+      res.status(401).send({
+        error: 'Unauthorized'
+      });
+    }
+  });
 
   app.get('/token', function (req, res) {
     Request.post({
@@ -173,6 +178,10 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
     Request.post({
       url: 'http://rancher.cloudwarehub.com:8080/v2-beta/projects/1a5/container',
       method: 'POST',
+      auth: {
+        user: RANCHER_USER,
+        pass: RANCHER_PASS
+      },
       json: data
     }, function(err, httpResponse, body) {
       console.log(body);
@@ -182,6 +191,10 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
       setTimeout(function() {
         Request.get({
           url: 'http://rancher.cloudwarehub.com:8080/v2-beta/projects/1a5/containers/' + body.id + '/ports',
+          auth: {
+            user: RANCHER_USER,
+            pass: RANCHER_PASS
+          },
         }, function(err, hr, body) {
           console.log(body);
           var d = JSON.parse(body);
@@ -213,7 +226,13 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
   app.delete('/desktops/:id', function(req, res) {
     db.collection('desktops').findOne({_id: new ObjectId(req.params.id)}, function(err, item) {
       if (item) {
-        Request.delete('http://rancher.cloudwarehub.com:8080/v2-beta/projects/1a5/containers/' + item.rancher_container_id);
+        Request.delete({
+          url: 'http://rancher.cloudwarehub.com:8080/v2-beta/projects/1a5/containers/' + item.rancher_container_id,
+          auth: {
+            user: RANCHER_USER,
+            pass: RANCHER_PASS
+          },
+        });
       }
       db.collection('desktops').remove({_id: new ObjectId(req.params.id)}, function(err, item) {
         res.send(item);
@@ -223,6 +242,40 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
 
   app.listen(3000, function () {
     console.log('Example app listening on port 3000!')
-  })
+  });
+
+  /** ws server **/
+  const WebSocket = require('ws');
+
+  const wss = new WebSocket.Server({
+    perMessageDeflate: false,
+    port: 3001
+  });
+
+  wss.on('connection', function connection(ws) {
+    const location = url.parse(ws.upgradeReq.url, true);
+    if (!location.query.token || location.query.id) {
+      ws.send('params error');
+      ws.close();
+      return;
+    }
+    var token = location.query.token;
+    var id = location.query.id;
+    jwt.verify(token, JWT_SECRET, function(err, decoded) {
+      if (!decoded) {
+        ws.send('invalid token');
+        ws.close();
+        return;
+      }
+
+    });
+    console.log(location.query.token)
+    ws.on('message', function incoming(message) {
+      console.log('received: %s', message);
+    });
+
+    ws.send('something');
+  });
 });
+
 
