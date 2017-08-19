@@ -283,52 +283,13 @@ MongoClient.connect('mongodb://' + mongo_addr, function(err, db) {
                 res.send({token: body.token});
             })
         })
-
-
-        app.listen(3000, '0.0.0.0', function() {
-            console.log('Example app listening on port 3000!')
-        })
-
-        /** ws server **/
-// const WebSocket = require('ws');
-//
-// const wss = new WebSocket.Server({
-//   perMessageDeflate: false,
-//   port: 3001
-// });
-//
-// wss.on('connection', function connection(ws) {
-//   const location = url.parse(ws.upgradeReq.url, true);
-//   if (!location.query.token || location.query.id) {
-//     ws.send('params error');
-//     ws.close();
-//     return;
-//   }
-//   var token = location.query.token;
-//   var id = location.query.id;
-//   jwt.verify(token, JWT_SECRET, function(err, decoded) {
-//     if (!decoded) {
-//       ws.send('invalid token');
-//       ws.close();
-//       return;
-//     }
-//     db.collection('desktops').findOne({user_id: decoded, rancher_container_id: id}, function(err, item) {
-//       if (!item) {
-//         ws.send('not your resource');
-//         ws.close();
-//         return;
-//       }
-//
-//     })
-//   });
-//   console.log(location.query.token)
-//   ws.on('message', function incoming(message) {
-//     console.log('received: %s', message);
-//   });
-//
-//   ws.send('something');
-// });
     })
+
+    app.listen(3000, '0.0.0.0', function() {
+        console.log('Example app listening on port 3000!')
+    })
+    
+
 })
 
 // console.log(jwt.sign('58e924ae8efc34bad452b357', JWT_SECRET))
