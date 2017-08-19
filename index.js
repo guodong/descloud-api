@@ -231,9 +231,10 @@ MongoClient.connect('mongodb://' + mongo_addr, function(err, db) {
 
     });
 
-    //app.get('/desktops/:id', function(req, res) {
-    db.collection('desktops').findOne({_id: new ObjectId(req.params.id)}, function(err, item) {
-        res.send(item);
+    app.get('/desktops/:id', function(req, res) {
+        db.collection('desktops').findOne({_id: new ObjectId(req.params.id)}, function(err, item) {
+            res.send(item);
+        });
     });
 
     app.delete('/desktops/:id', function(req, res) {
