@@ -10,9 +10,15 @@ const url = require('url');
 
 const JWT_SECRET = 'descloudsecreT';
 
+if (process.env.ENV == 'dev') {
+  var CLIENT_ID = 'cdc75e6ed850a032a91a';
+  var CLIENT_SECRET = '21f337e18268ffc36213f199a92552deb4ca89b5';
+} else {
+  var CLIENT_ID = 'e86a6be6abe38a4c6a56';
+  var CLIENT_SECRET = '9d4d633b29b4540461ce2339995848b8173101a5';
+}
 const RANCHER_USER = 'CBCA67D9254C7C52D0C0';
 const RANCHER_PASS = 'R45874piapVw45Sgyp7XogBJu7RLgm3HyEHEed2k';
-
 
 var mongo_addr = process.env.MONGO_ADDR || 'localhost:27017/descloud';
 
@@ -38,8 +44,8 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
     Request.post({
       url: 'https://github.com/login/oauth/access_token',
       json: {
-        client_id: 'e86a6be6abe38a4c6a56',
-        client_secret: '9d4d633b29b4540461ce2339995848b8173101a5',
+        client_id: CLIENT_ID,
+        client_secret: CLIENT_SECRET,
         code: req.query.code
       }
     }, function(err, httpResponse, body) {console.log(body)
@@ -90,6 +96,12 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
     });
   });
 
+  app.get('/users', function(req, res) {
+    db.collection('users').findOne({_id: new ObjectId(req.user)}, function(err, item) {
+      res.send(item)
+    });
+  });
+
   app.get('/desktops', function(req, res) {
     db.collection('desktops').find({user_id: req.user}).toArray(function(err, items) {
       if (err)
@@ -109,7 +121,6 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
       readOnly: false,
       networkMode: "bridge",
       type: "container",
-      requestedHostId: "1h5",
       secrets: [],
       dataVolumes: [],
       dataVolumesFrom: [],
@@ -123,7 +134,9 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
       imageUuid: "docker:daocloud.io/guodong/pulsar-desktop1:latest",
       ports: ["5678/tcp"],
       instanceLinks: {},
-      labels: {},
+      labels: {
+        "io.rancher.scheduler.affinity:host_label": "cloudware=true"
+      },
       networkContainerId: null,
       count: null,
       createIndex: null,
@@ -217,7 +230,7 @@ MongoClient.connect('mongodb://'+mongo_addr, function (err, db) {
 
   });
 
-  app.get('/desktops/:id', function(req, res) {
+  //app.get('/desktops/:id', function(req, res) {
     db.collection('desktops').findOne({_id: new ObjectId(req.params.id)}, function(err, item) {
       res.send(item);
     });
